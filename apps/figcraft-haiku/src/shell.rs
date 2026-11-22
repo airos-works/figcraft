@@ -135,6 +135,9 @@ pub fn run(root: i32, scale: f32, args: Args, roots: Option<Arc<Roots>>) -> Resu
                     ctx.send_viewport_cmd(ViewportCommand::Focus);
                 }
                 kind::COLORS => {
+                    figcraft_render::air_os::clear_cache();
+                    // Canvas jobs and retained tiles watch the font/layout generation.
+                    figcraft_text::clear_layout_cache();
                     let dev = host::device_scale();
                     views.set_density(host::ui_scale() * dev, dev);
                 }

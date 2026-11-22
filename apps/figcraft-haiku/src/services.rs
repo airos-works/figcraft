@@ -60,6 +60,13 @@ impl Native {
     }
 }
 impl Services for Native {
+    fn native_design_preview(&mut self, session: &Session) -> Result<serde_json::Value, String> {
+        let doc = session.doc().map_err(|e| e.to_string())?;
+        let page = session.page().map_err(|e| e.to_string())?;
+        let (native, composited) = figcraft_render::air_os::preview(doc, page)?;
+        Ok(serde_json::json!({"page":page,"nativeControls":native,"compositedControls":composited}))
+    }
+
     fn design_review(&mut self, session: &Session, digest: Option<&str>) -> Result<serde_json::Value, String> {
         self.review.handle(session, digest)
     }

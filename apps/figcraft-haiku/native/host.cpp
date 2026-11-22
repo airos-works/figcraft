@@ -978,6 +978,7 @@ public:
 	virtual void MessageReceived(BMessage* message)
 	{
 		switch (message->what) {
+			case B_FONTS_UPDATED:
 			case B_COLORS_UPDATED:
 				Push(MakeEvent(VC_COLORS, fId));
 				break;

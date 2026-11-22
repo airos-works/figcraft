@@ -890,6 +890,13 @@ fn fill_vector_regions(ctx: &Ctx, pix: &mut Pixmap, n: &Node, network: &figcraft
 /// Fills, `over_fills`, children (clipped), strokes and text of a node, without opacity/effects.
 fn draw_content(ctx: &Ctx, pix: &mut Pixmap, n: &Node, xf: Affine, depth: usize, over_fills: OverFills) {
     let doc = ctx.doc;
+    #[cfg(target_os = "haiku")]
+    if crate::air_os::draw(doc, pix, n, xf).is_some() {
+        if let Some(inner) = over_fills {
+            inner(pix);
+        }
+        return;
+    }
     let (w, h) = (n.width, n.height);
     match &n.kind {
         NodeKind::Page { .. } => {

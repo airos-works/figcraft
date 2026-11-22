@@ -1,0 +1,10 @@
+[package]
+name = "figcraft-airos-controls"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "Offscreen native Interface Kit controls for FigCraft on air/OS"
+
+[build-dependencies]
+cc = "1"

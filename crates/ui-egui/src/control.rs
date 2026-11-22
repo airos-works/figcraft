@@ -1464,6 +1464,7 @@ pub fn handle(app: &mut FigApp, ctx: &Context, method: &str, p: &Value) -> Resul
         front_only(&app.session, app.session.ds().ok().map(|d| d.uid), method, p)?;
     }
     match method {
+        "design.nativePreview" => app.services.native_design_preview(&app.session),
         "design.requestReview" => app.services.design_review(&app.session, None),
         "design.reviewStatus" => app.services.design_review(&app.session, Some(p.get("sha256").and_then(Value::as_str).ok_or("sha256 required")?)),
         "engine.execute" => {

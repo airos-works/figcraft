@@ -1,5 +1,5 @@
 name figcraft
-version 0.18.1~airos1-1
+version 0.18.1~airos1-2
 architecture x86_64
 summary "Interface designer and prototyping editor"
 description "Design air/OS applications with editable kit components, the FigCraft editor and an MCP server with operator design review."

@@ -108,6 +108,35 @@ fn air_os_elements_are_editable_components_with_matching_implementation_metadata
 }
 
 #[test]
+fn air_os_native_instance_keeps_its_label_and_state_after_reopening() {
+    let mut session = Session::with_document(built("air-os"));
+    let components = session.execute("component.list", &json!({})).unwrap();
+    let checkbox = components.as_array().unwrap().iter().find(|c| c["name"] == "BCheckBox").unwrap();
+    let created = session.execute("instance.create", &json!({"component":checkbox["id"]})).unwrap();
+    let id = crate::params::id_of(&created["id"]).unwrap();
+    session
+        .execute("instance.setProperties", &json!({"ids":[id.0],"properties":{"Label":"Include subfolders","Checked":true,"Enabled":false}}))
+        .unwrap();
+    let bytes = figcraft_format::save_bytes(session.doc().unwrap(), None).unwrap();
+    let (doc, issues) = figcraft_format::load_bytes(&bytes).unwrap();
+    assert!(issues.is_empty());
+    let instance = doc.node(id).unwrap();
+    let NodeKind::Instance { props, .. } = &instance.kind else { panic!("expected a reusable instance") };
+    assert_eq!(props["Checked"], true);
+    assert_eq!(props["Enabled"], false);
+    let appearance = instance.children.iter().filter_map(|id| doc.node(*id)).find(|node| node.plugin_data.contains_key("airOS.widget")).unwrap();
+    assert_eq!(appearance.plugin_data["airOS.widget"], "BCheckBox");
+    assert_eq!(figcraft_doc::air_os::widget_label(&doc, appearance), Some("Include subfolders"));
+    assert!(
+        appearance
+            .children
+            .iter()
+            .filter_map(|id| doc.node(*id))
+            .any(|node| node.kind.text().is_some_and(|text| text.characters == "Include subfolders"))
+    );
+}
+
+#[test]
 fn templates_save_and_reopen_losslessly() {
     for t in TEMPLATES {
         let doc = built(t.id);

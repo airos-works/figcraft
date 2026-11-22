@@ -5,6 +5,8 @@
 //! runs identically on desktop, in tests and in the browser.
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
+#[cfg(target_os = "haiku")]
+pub mod air_os;
 pub mod backdrop;
 pub mod blur;
 pub mod boolean;

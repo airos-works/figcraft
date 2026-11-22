@@ -7,6 +7,7 @@ use std::process::Command;
 /// (crate suffix, layer)
 const TABLE: &[(&str, u8)] = &[
     ("geom", 0),
+    ("airos-controls", 0),
     ("color", 0),
     ("doc", 1),
     ("layout", 2),

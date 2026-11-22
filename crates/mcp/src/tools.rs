@@ -113,6 +113,7 @@ pub const TOOL_NAMES: &[&str] = &[
     "type_text",
     "inspect_ui",
     "wait_for_changes",
+    "preview_air_os_design",
     "request_design_review",
     "design_review_status",
 ];
@@ -140,6 +141,9 @@ pub fn tool_definitions() -> Vec<Value> {
     let document = id_schema(
         "The open file to act on: its `id` (from run_command doc.list, or the `document` open_file and inspect_document return) or its path. Default: the file in front. The tab in front stays in front; with an attached app, a screenshot of the window needs the file in front",
     );
+    tools.push(tool("preview_air_os_design", "Preview the current air/OS design",
+        "Show or refresh the active page at actual size in the attached air/OS editor. Ordinary controls are live Interface Kit views. Call after each round of design edits, including before saving. This preview does not approve the design.",
+        obj(json!({}), &[]), false));
     tools.push(tool("request_design_review", "Request operator design review",
         "Show the saved front .figcraft design to the operator in the attached air/OS editor. Returns pending and the SHA-256 of the reviewed file. Wait for design_review_status before implementing the design.",
         obj(json!({}), &[]), false));
@@ -602,6 +606,8 @@ pub fn call_tool(b: &mut dyn Backend, name: &str, args: &Value) -> ToolResult {
         None => b,
     };
     let r = match name {
+        "preview_air_os_design" if !b.has_ui() => Err("Attach to the air/OS FigCraft editor for native preview".into()),
+        "preview_air_os_design" => b.call("design.nativePreview", json!({})).map(|v| ToolResult::json(&v)),
         "request_design_review" | "design_review_status" if !b.has_ui() => {
             Err("Attach to the air/OS FigCraft editor to request or check operator approval".into())
         }
