@@ -46,3 +46,9 @@ egui's default fonts (compiled into the `egui`/`epaint` crates) keep their own l
 | Path | Contributor | Source | Licence | Review |
 |---|---|---|---|---|
 | `crates/ui-egui/locales/ar.toml` | @hussain-hz with OpenAI Codex (AI-assisted) | Original Arabic wording from FigCraft's English catalog and engine command labels; no proprietary localisation consulted | MIT OR Apache-2.0 | Draft; native-speaker review and maintainer approval pending |
+
+## air/OS port
+
+- The window host, Vulkan and software renderers, input conversion and viewport handling in `apps/figcraft-haiku` derive from airos-works/VectorCraft at `f5eb1ad0ff985d659fd924240640ac002da9173c` (MIT OR Apache-2.0). [Source](https://github.com/airos-works/vectorcraft/tree/f5eb1ad0ff985d659fd924240640ac002da9173c/apps/vectorcraft-haiku)
+- The Deskbar HVIF in the native resources and the editable air/OS templates are original artwork for this port, under MIT OR Apache-2.0. Component names and header references identify interfaces in the air/OS SDK. The synthetic example uses no external images.
+- The three vendored wgpu crates are wgpu 30.0.1 (MIT OR Apache-2.0) with the Haiku Vulkan configuration from the VectorCraft port. The font-store dependency cap-primitives 4.0.3 carries its original copyright and licence files in `vendor/cap-primitives`. Port changes are identified in [the vendor notes](vendor/README.md).

@@ -1464,6 +1464,8 @@ pub fn handle(app: &mut FigApp, ctx: &Context, method: &str, p: &Value) -> Resul
         front_only(&app.session, app.session.ds().ok().map(|d| d.uid), method, p)?;
     }
     match method {
+        "design.requestReview" => app.services.design_review(&app.session, None),
+        "design.reviewStatus" => app.services.design_review(&app.session, Some(p.get("sha256").and_then(Value::as_str).ok_or("sha256 required")?)),
         "engine.execute" => {
             let cmd = p.get("command").and_then(Value::as_str).ok_or("`command` required")?;
             let params = p.get("params").cloned().unwrap_or(json!({}));

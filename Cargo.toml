@@ -201,3 +201,10 @@ winit = { git = "https://github.com/storytold/winit.git", rev = "a517b3846ee8457
 # craft-libs' vendored krilla 0.8.2: decoded PNGs are capped at 1 GiB and reserved fallibly, and a
 # panic while drawing unwinds without aborting.
 krilla = { git = "https://github.com/storytold/craft-libs", rev = "a49329e71e32ad93794ab595c41f33209a7d2220" }
+# Haiku has no d_type, O_PATH or O_RSYNC and uses signed ino_t/nlink_t.
+cap-primitives = { path = "vendor/cap-primitives" }
+# air/OS (Haiku): wgpu 30.0.1 with its Vulkan backend enabled for `target_os = "haiku"`
+# (vendor/README.md); the native host (apps/vectorcraft-haiku) draws with it.
+wgpu = { path = "vendor/wgpu" }
+wgpu-core = { path = "vendor/wgpu-core" }
+wgpu-core-deps-windows-linux-android = { path = "vendor/wgpu-core-deps-windows-linux-android" }

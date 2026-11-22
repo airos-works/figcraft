@@ -92,7 +92,25 @@ fn run(cli: Cli) -> CliResult<ExitCode> {
             Ok(ExitCode::SUCCESS)
         }
         // `--attach` conflicts with the roots: the app runs the commands, only its own roots can confine them.
-        Command::Mcp(a) => mcp(a.attach.as_deref(), a.timeout, roots_of(&a.roots)?),
+        Command::Mcp(a) => {
+            if a.attach.is_none() && (a.roots.automation_read_root.is_empty() || a.roots.automation_write_root.is_empty()) {
+                return Err(CliError::Usage("headless MCP requires --automation-read-root DIR and --automation-write-root DIR".into()));
+            }
+            mcp(a.attach.as_deref(), a.timeout, roots_of(&a.roots)?)
+        }
+        Command::ReviewCheck(a) => {
+            use figcraft_mcp::Backend;
+            let bytes = figcraft_engine::file_access::read_capped(&a.file, figcraft_engine::cmd::file::MAX_DOCUMENT_FILE)
+                .map_err(|e| CliError::Failed(e.to_string()))?;
+            let digest = figcraft_format::image_hash(&bytes);
+            let mut editor = figcraft_mcp::Attached::port(a.attach).map_err(|e| format!("cannot reach FigCraft: {e}"))?;
+            let reply = editor.call("design.reviewStatus", json!({"sha256":digest}))?;
+            if reply.get("status").and_then(Value::as_str) != Some("approved") || reply.get("sha256").and_then(Value::as_str) != Some(&digest) {
+                return Err(CliError::Failed(format!("design approval required ({})", reply["status"])));
+            }
+            println!("{digest}");
+            Ok(ExitCode::SUCCESS)
+        }
         Command::Plugin { command: PluginCommand::Publish(a) } => publish_plugin(&a.folder, &a.server),
         Command::Connect { command: ConnectCommand::Publish(a) } => confined(&a.roots, || files::connect_publish(&a.file, &a.mappings, a.dry_run)),
         Command::Perf(a) => {

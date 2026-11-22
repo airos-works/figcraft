@@ -27,7 +27,7 @@ fn count(doc: &Document, f: impl Fn(&NodeKind) -> bool) -> usize {
 
 #[test]
 fn every_template_builds_a_valid_document_the_same_every_time() {
-    assert_eq!(TEMPLATES.len(), 8);
+    assert_eq!(TEMPLATES.len(), 9);
     for t in TEMPLATES {
         let doc = built(t.id);
         assert_eq!(doc.validate(), Vec::<String>::new(), "{}", t.id);
@@ -86,6 +86,25 @@ fn templates_use_the_features_they_show() {
     assert_eq!(built("social-posts").node(built("social-posts").first_page().unwrap()).unwrap().children.len(), 5);
     assert_eq!(built("slides").node(built("slides").first_page().unwrap()).unwrap().children.len(), 5);
     assert_eq!(built("landing-page").node(built("landing-page").first_page().unwrap()).unwrap().children.len(), 2, "desktop and phone");
+}
+
+#[test]
+fn air_os_elements_are_editable_components_with_matching_implementation_metadata() {
+    let mut session = Session::with_document(built("air-os"));
+    let catalog = session.execute("airOS.listElements", &json!({})).unwrap();
+    let components = session.execute("component.list", &json!({})).unwrap();
+    let components = components.as_array().unwrap();
+    assert_eq!(components.len(), catalog.as_array().unwrap().len());
+    for entry in catalog.as_array().unwrap() {
+        let component = components.iter().find(|c| c["name"] == entry["name"]).unwrap();
+        let id = crate::params::id_of(&component["id"]).unwrap();
+        let node = session.doc().unwrap().node(id).unwrap();
+        assert_eq!(node.plugin_data.get("airOS.class").map(String::as_str), entry["class"].as_str());
+        assert_eq!(node.plugin_data.get("airOS.header").map(String::as_str), entry["header"].as_str());
+        assert!(!node.children.is_empty() || entry["class"] == "BSpaceLayoutItem", "{}", entry["name"]);
+        let result = session.execute("instance.create", &json!({"component":component["id"]})).unwrap();
+        assert!(result.get("id").is_some(), "{}", entry["name"]);
+    }
 }
 
 #[test]

@@ -113,6 +113,8 @@ pub const TOOL_NAMES: &[&str] = &[
     "type_text",
     "inspect_ui",
     "wait_for_changes",
+    "request_design_review",
+    "design_review_status",
 ];
 
 /// The tools that take `document`: they act on the file it names instead of the one in front.
@@ -138,6 +140,12 @@ pub fn tool_definitions() -> Vec<Value> {
     let document = id_schema(
         "The open file to act on: its `id` (from run_command doc.list, or the `document` open_file and inspect_document return) or its path. Default: the file in front. The tab in front stays in front; with an attached app, a screenshot of the window needs the file in front",
     );
+    tools.push(tool("request_design_review", "Request operator design review",
+        "Show the saved front .figcraft design to the operator in the attached air/OS editor. Returns pending and the SHA-256 of the reviewed file. Wait for design_review_status before implementing the design.",
+        obj(json!({}), &[]), false));
+    tools.push(tool("design_review_status", "Read operator design decision",
+        "Check the operator's decision for this exact saved design. Continue implementation only on approved and only for the returned SHA-256. Save edits and request a fresh review if stale or rejected.",
+        obj(json!({"sha256": string("File digest returned by request_design_review")}), &["sha256"]), true));
     for t in &mut tools {
         if t.get("name").and_then(Value::as_str).is_some_and(|n| DOCUMENT_TOOLS.contains(&n))
             && let Some(props) = t.pointer_mut("/inputSchema/properties").and_then(Value::as_object_mut)
@@ -594,6 +602,11 @@ pub fn call_tool(b: &mut dyn Backend, name: &str, args: &Value) -> ToolResult {
         None => b,
     };
     let r = match name {
+        "request_design_review" | "design_review_status" if !b.has_ui() => {
+            Err("Attach to the air/OS FigCraft editor to request or check operator approval".into())
+        }
+        "request_design_review" => b.call("design.requestReview", json!({})).map(|v| ToolResult::json(&v)),
+        "design_review_status" => b.call("design.reviewStatus", Value::Object(a)).map(|v| ToolResult::json(&v)),
         "list_commands" => list_commands(b, &a),
         "run_command" => run_command(b, &a),
         "batch" => batch(b, &a),

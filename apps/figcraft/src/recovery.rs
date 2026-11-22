@@ -302,7 +302,13 @@ const LOCK_WAIT: std::time::Duration = std::time::Duration::from_millis(100);
 /// Lock the folder `dir` (`WouldBlock` while another process holds it).
 fn lock_folder(dir: &Path) -> Result<File, std::fs::TryLockError> {
     let lock = File::options().write(true).create(true).truncate(false).open(dir.join(LOCK)).map_err(std::fs::TryLockError::Error)?;
+    #[cfg(not(target_os = "haiku"))]
     lock.try_lock()?;
+    #[cfg(target_os = "haiku")]
+    rustix::fs::flock(&lock, rustix::fs::FlockOperation::NonBlockingLockExclusive).map_err(|e| {
+        let err = std::io::Error::from(e);
+        if err.kind() == std::io::ErrorKind::WouldBlock { std::fs::TryLockError::WouldBlock } else { std::fs::TryLockError::Error(err) }
+    })?;
     Ok(lock)
 }
 

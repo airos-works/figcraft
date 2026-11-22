@@ -5,6 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 
+pub use crate::persistence::shutdown;
+use crate::persistence::{STATE, write_prefs, write_private};
 use figcraft_engine::{Prefs, Session};
 use figcraft_ui_egui::{DialogFuture, FigApp, Services};
 use serde_json::{Value, json};
@@ -342,49 +344,6 @@ fn open_directory(file: &std::fs::File) -> Result<(), String> {
     let conn = zbus::blocking::Connection::session().map_err(|e| e.to_string())?;
     let body = ("", Fd::from(file), std::collections::HashMap::<&str, Value<'_>>::new());
     conn.call_method(Some(PORTAL), PORTAL_PATH, Some(OPEN_URI), "OpenDirectory", &body).map(|_| ()).map_err(|e| e.to_string())
-}
-
-/// The preferences' file in the config folder.
-const STATE: &str = "state.json";
-
-/// Everything quitting keeps, all done when it returns (macOS then ends the process): the
-/// preferences in `dir`, this run's recovery copies ([`Recovery::quit`](crate::recovery::Recovery::quit))
-/// and the live sessions' ends (one this app hosts tells everyone and stops; a joined one leaves).
-pub fn shutdown(app: &mut FigApp, dir: Option<&Path>, recovery: Option<crate::recovery::Recovery>) {
-    if let Some(dir) = dir {
-        write_prefs(dir, &app.session.prefs);
-    }
-    // Before the sessions end: a recovered online file's copy waits for its session's outcome.
-    if let Some(r) = recovery {
-        r.quit(&app.session, app.ui.quit);
-    }
-    drop(std::mem::take(&mut app.session.live));
-}
-
-/// Write `prefs` to `dir` atomically (a temporary file renamed over the old one: a crash leaves
-/// either version whole). They hold online owner tokens, so on Unix only the owner can read them.
-pub(crate) fn write_prefs(dir: &Path, prefs: &Prefs) {
-    let tmp = dir.join("state.json.tmp");
-    let written = std::fs::create_dir_all(dir)
-        .and_then(|()| write_private(&tmp, json!({"prefs": prefs}).to_string().as_bytes()))
-        .and_then(|()| std::fs::rename(&tmp, dir.join(STATE)));
-    if let Err(e) = written {
-        log::warn!("preferences: couldn't save them in {}: {e}", dir.display());
-    }
-}
-
-/// Write `bytes` to `path`, owner read/write only on Unix from before the first byte (a leftover
-/// file from a crash is narrowed too: the mode given at open only applies to new files).
-fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
-    use std::io::Write;
-    let mut o = std::fs::OpenOptions::new();
-    o.write(true).create(true).truncate(true);
-    #[cfg(unix)]
-    std::os::unix::fs::OpenOptionsExt::mode(&mut o, 0o600);
-    let mut f = o.open(path)?;
-    #[cfg(unix)]
-    f.set_permissions(std::os::unix::fs::PermissionsExt::from_mode(0o600))?;
-    f.write_all(bytes)
 }
 
 thread_local! {

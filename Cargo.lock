@@ -733,8 +733,6 @@ dependencies = [
 [[package]]
 name = "cap-primitives"
 version = "4.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b5f74729fd2f44701d1a8eb47e906cdb3ccd9ec0f02baad85a744b791940b18"
 dependencies = [
  "ambient-authority",
  "fs-set-times",
@@ -2143,6 +2141,7 @@ dependencies = [
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
  "rfd",
+ "rustix 1.1.5",
  "serde_json",
  "wat",
  "webbrowser",
@@ -2299,6 +2298,31 @@ version = "0.18.1"
 dependencies = [
  "kurbo",
  "serde",
+]
+
+[[package]]
+name = "figcraft-haiku"
+version = "0.18.1"
+dependencies = [
+ "accesskit_consumer",
+ "ash",
+ "cc",
+ "egui",
+ "egui-wgpu",
+ "env_logger",
+ "figcraft-collab-net",
+ "figcraft-engine",
+ "figcraft-format",
+ "figcraft-render",
+ "figcraft-text",
+ "figcraft-ui-egui",
+ "image",
+ "log",
+ "pollster 1.0.1",
+ "rayon",
+ "rustix 1.1.5",
+ "serde_json",
+ "wgpu",
 ]
 
 [[package]]
@@ -6638,8 +6662,6 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "wgpu"
 version = "30.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "527ccdf43dd5b2e8676eed9984ce00e2bbb0a1b85b70c1969dcb6cd2eb55ab9e"
 dependencies = [
  "arrayvec",
  "bitflags 2.13.2",
@@ -6668,8 +6690,6 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "30.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14c018fce9b6270aa203c2fdd56f3cce996713534bd757e4ea58c8560b121f14"
 dependencies = [
  "arrayvec",
  "bit-set 0.10.0",
@@ -6730,8 +6750,6 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-windows-linux-android"
 version = "30.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7586165fd5f6d881cb9ce4bb71f40d6caab2c0f1837e3fc1d9788a197fb6004f"
 dependencies = [
  "wgpu-hal",
 ]

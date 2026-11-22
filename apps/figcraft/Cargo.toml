@@ -72,3 +72,6 @@ winresource = "0.1"
 # Use vector window controls without a title-font renderer or embedded Cantarell. The compositor
 # probe that used to need raw-window-handle and wayland-client here now lives in craft-window.
 winit = { version = "0.30", default-features = false, features = ["wayland-csd-adwaita-notitle"] }
+
+[target.'cfg(target_os = "haiku")'.dependencies]
+rustix = { version = "1", default-features = false, features = ["std","fs"] }

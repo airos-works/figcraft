@@ -88,6 +88,8 @@
 
 <br>
 
+On air/OS, launch **Developer → FigCraft** in the Deskbar. The [air/OS guide](docs/haiku.md) covers the native component kit, MCP and operator design review.
+
 ## A look around
 
 <table>
@@ -231,7 +233,7 @@ figcraft-cli run build-card.json --out card.figcraft
 figcraft-cli commands --filter autoLayout
 
 # Let an agent drive it over MCP (headless, or attached to the running app)
-figcraft-cli mcp
+figcraft-cli mcp --automation-read-root /work/project --automation-write-root /work/project
 figcraft-cli mcp --attach 47800
 ```
 

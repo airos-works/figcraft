@@ -7,6 +7,7 @@
 //! components with properties and instances of them, variables with modes, constraints and
 //! prototype links. Building one is deterministic: the same document every time.
 
+mod airos;
 mod dashboard;
 mod design_system;
 mod glyphs;
@@ -70,6 +71,14 @@ pub struct Template {
 }
 
 pub static TEMPLATES: &[Template] = &[
+    Template {
+        id: "air-os",
+        name: "air/OS application",
+        description: "Editable Interface Kit components and a starter window for air/OS apps",
+        kind: Kind::App,
+        size: "Desktop",
+        make: airos::build,
+    },
     Template {
         id: "mobile-app",
         name: "Mobile app",
@@ -179,6 +188,13 @@ fn new_from_template(s: &mut Session, p: &Value) -> Result<Value> {
 
 pub fn specs() -> Vec<CommandSpec> {
     vec![
+        spec!(
+            "airOS.listElements",
+            "List air/OS UI elements",
+            "{}  native design components, Be class, header, group and default size. Open file.newFromTemplate {template: air-os} and place instances using component.list and instance.create.",
+            false,
+            |_, _| Ok(airos::catalog())
+        ),
         spec!(
             "template.list",
             "List templates",

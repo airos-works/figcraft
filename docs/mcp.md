@@ -14,7 +14,7 @@ The server lives in `crates/mcp` (`figcraft-mcp`) and is started by the CLI:
 
 | Command | Backend |
 |---|---|
-| `figcraft-cli mcp` | **Headless**: an in-process engine session with one untitled document. No window; renders with the CPU renderer. |
+| `figcraft-cli mcp --automation-read-root DIR --automation-write-root DIR` | **Headless**: an in-process engine session with one untitled document. No window; renders with the CPU renderer. |
 | `figcraft-cli mcp --attach <port>` | **Attached**: drives a running FigCraft app through its control channel (`figcraft --control <port>`). The user sees every change live. |
 
 `--attach` also takes `host:port`. The control channel only listens on 127.0.0.1. The app takes up
@@ -46,6 +46,10 @@ renders work as usual (minimised, each request to the app takes up to about 0.1 
 which can't report a minimised window, about half a second). Only a capture
 of the window itself (`screenshot` with `window`) needs it on screen: it is then an error at once;
 `screenshot` without `window` renders the document instead.
+
+### Designing an air/OS app
+
+The air/OS editor supports `airOS.listElements`, the `air-os` starter kit and operator review of a saved design. Attach to the editor for review. The build can check the approved file with `figcraft-cli review-check`. See the [air/OS workflow](haiku.md).
 
 ### Confining file access
 
@@ -129,7 +133,7 @@ The headless server lays text out with the same fonts as the app: the fonts buil
 plus the installed system fonts, indexed once, the first time text is laid out (a session that
 never touches text never pays for it). So text sizes, auto layout and exports match what users see
 in the app. For renders that come out the same on every machine (CI), start it with
-`figcraft-cli mcp --no-system-fonts` or set `FIGCRAFT_NO_SYSTEM_FONTS=1`: text then uses only the
+`figcraft-cli --no-system-fonts mcp --automation-read-root DIR --automation-write-root DIR` or set `FIGCRAFT_NO_SYSTEM_FONTS=1`: text then uses only the
 built-in fonts. Attached, the app's own fonts apply. The browser build has no system fonts.
 
 ## Configure a client
@@ -144,7 +148,7 @@ The Linux AppImage bundles the CLI: `FigCraft.AppImage cli <args>` runs `figcraf
 
 ```sh
 # headless
-claude mcp add figcraft -- /path/to/figcraft-cli mcp
+claude mcp add figcraft -- /path/to/figcraft-cli mcp --automation-read-root /work/project --automation-write-root /work/project
 # drive the running app (start it with: figcraft --control 7979)
 claude mcp add figcraft-app -- /path/to/figcraft-cli mcp --attach 7979
 ```
@@ -154,7 +158,7 @@ Or in a project's `.mcp.json`:
 ```json
 {
   "mcpServers": {
-    "figcraft": { "command": "/path/to/figcraft-cli", "args": ["mcp"] }
+    "figcraft": { "command": "/path/to/figcraft-cli", "args": ["mcp", "--automation-read-root", "/work/project", "--automation-write-root", "/work/project"] }
   }
 }
 ```
@@ -166,7 +170,7 @@ Or in a project's `.mcp.json`:
 ```json
 {
   "mcpServers": {
-    "figcraft": { "command": "/path/to/figcraft-cli", "args": ["mcp"] },
+    "figcraft": { "command": "/path/to/figcraft-cli", "args": ["mcp", "--automation-read-root", "/work/project", "--automation-write-root", "/work/project"] },
     "figcraft-app": { "command": "/path/to/figcraft-cli", "args": ["mcp", "--attach", "7979"] }
   }
 }

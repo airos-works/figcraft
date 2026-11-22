@@ -26,6 +26,7 @@ mod args;
 mod control_server;
 mod gamepad;
 mod graphics;
+mod persistence;
 mod recovery;
 mod services;
 mod startup;

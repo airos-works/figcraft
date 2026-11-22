@@ -36,6 +36,8 @@ pub enum Command {
     Run(RunArgs),
     Commands(CommandsArgs),
     Mcp(McpArgs),
+    /// Check that the operator approved this exact saved design in the running air/OS editor
+    ReviewCheck(ReviewCheckArgs),
     /// Publish plugins to a server's plugin directory
     Plugin {
         #[command(subcommand)]
@@ -214,6 +216,15 @@ pub struct McpArgs {
     pub timeout: Option<u64>,
     #[command(flatten)]
     pub roots: RootArgs,
+}
+
+#[derive(Args)]
+pub struct ReviewCheckArgs {
+    /// Local port of the editor serving the design review
+    #[arg(long, value_name = "PORT")]
+    pub attach: u16,
+    /// Saved .figcraft file that the build will consume
+    pub file: String,
 }
 
 #[derive(Subcommand)]

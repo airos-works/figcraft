@@ -4,6 +4,11 @@ pub const MAX_CLIPBOARD_PNG_BYTES: usize = 256 * 1024 * 1024;
 
 /// Platform services the app crate provides (file dialogs, clipboard, URLs).
 pub trait Services {
+    /// Ask the operator to review the saved front document, or check a previous request.
+    fn design_review(&mut self, _session: &Session, _digest: Option<&str>) -> Result<Value, String> {
+        Err("Design review requires an attached air/OS FigCraft editor".into())
+    }
+
     fn pick_open(&mut self, _title: &str, _exts: &[&str]) -> DialogFuture {
         Box::pin(std::future::ready(None))
     }

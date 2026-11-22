@@ -104,24 +104,21 @@ pub fn bind(port: u16, busy: Duration) -> std::io::Result<TcpListener> {
 }
 
 pub fn start(port: u16, busy: Duration, queue: Queue, ctx: CtxSlot, events: Arc<EventLog>) {
-    let listener = match bind(port, busy) {
-        Ok(l) => l,
-        Err(e) => {
-            log::error!("control server: can't bind 127.0.0.1:{port}: {e} (another app may own it; pick another port)");
-            eprintln!("FigCraft control server failed to bind port {port}: {e}");
-            return;
-        }
-    };
-    eprintln!("FigCraft control server listening on 127.0.0.1:{port}");
-    let spawned = std::thread::Builder::new().name("figcraft-control".into()).spawn(move || {
+    if let Err(e) = try_start(port, busy, queue, ctx, events) {
+        eprintln!("FigCraft control server failed to start on port {port}: {e}");
+    }
+}
+
+pub fn try_start(port: u16, busy: Duration, queue: Queue, ctx: CtxSlot, events: Arc<EventLog>) -> std::io::Result<()> {
+    let listener = bind(port, busy)?;
+    std::thread::Builder::new().name("figcraft-control".into()).spawn(move || {
         let mut workers = Vec::new();
         for stream in accepted(listener.incoming(), || std::thread::sleep(ACCEPT_RETRY)) {
             spawn_connection(stream, queue.clone(), ctx.clone(), events.clone(), &mut workers, TIMEOUT);
         }
-    });
-    if let Err(e) = spawned {
-        log::error!("control server thread: {e}");
-    }
+    })?;
+    eprintln!("FigCraft control server listening on 127.0.0.1:{port}");
+    Ok(())
 }
 
 /// The connections `incoming` accepts, calling `wait` after each failed accept.
